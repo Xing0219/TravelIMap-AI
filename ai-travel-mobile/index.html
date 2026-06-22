@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0d9488">
+  <title>TravelMap AI - 智能旅行规划</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+  <!-- 应用容器 -->
+  <div id="app" class="app">
+
+    <!-- ==================== 登录页 ==================== -->
+    <div class="page login-page" id="loginPage">
+      <div class="login-bg">
+        <div class="login-bg-pattern"></div>
+      </div>
+      <div class="login-content">
+        <div class="login-logo">
+          <svg viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="3"/>
+            <path d="M16 48 L32 16 L48 48" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="32" cy="16" r="6" fill="currentColor"/>
+          </svg>
+          <h1>TravelMap AI</h1>
+          <p>智能旅行规划，一键生成专属路线</p>
+        </div>
+
+        <div class="login-tabs">
+          <button class="login-tab active" data-tab="login">登录</button>
+          <button class="login-tab" data-tab="register">注册</button>
+          <div class="login-tab-indicator"></div>
+        </div>
+
+        <!-- 登录表单 -->
+        <form class="login-form active" id="loginForm">
+          <div class="form-item">
+            <div class="input-wrapper">
+              <span class="input-prefix">+86</span>
+              <input type="tel" id="loginPhone" placeholder="请输入手机号" maxlength="11" autocomplete="tel">
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="input-wrapper">
+              <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password">
+              <button type="button" class="eye-btn" id="toggleLoginPwd">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-options">
+            <label class="remember-me">
+              <input type="checkbox" id="rememberMe" checked>
+              <span>记住我</span>
+            </label>
+            <a href="#" class="forgot-link">忘记密码?</a>
+          </div>
+          <button type="submit" class="btn btn-primary btn-large">登录</button>
+        </form>
+
+        <!-- 注册表单 -->
+        <form class="login-form" id="registerForm">
+          <div class="form-item">
+            <div class="input-wrapper">
+              <span class="input-prefix">+86</span>
+              <input type="tel" id="regPhone" placeholder="请输入手机号" maxlength="11" autocomplete="tel">
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="input-wrapper code-input">
+              <input type="text" id="regCode" placeholder="请输入验证码" maxlength="6">
+              <button type="button" class="code-btn" id="sendCodeBtn">获取验证码</button>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="input-wrapper">
+              <input type="password" id="regPassword" placeholder="设置密码（6-20位）" autocomplete="new-password">
+              <button type="button" class="eye-btn" id="toggleRegPwd">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="input-wrapper">
+              <input type="text" id="regNickname" placeholder="设置昵称" maxlength="12">
+            </div>
+          </div>
+          <div class="agreement">
+            <label>
+              <input type="checkbox" id="agreeTerms" checked>
+              <span>我已阅读并同意<a href="#">用户协议</a>和<a href="#">隐私政策</a></span>
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary btn-large">注册</button>
+        </form>
+
+        <div class="divider">
+          <span>其他登录方式</span>
+        </div>
+        <div class="social-login">
+          <button class="social-btn wechat">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 01.598.082l1.584.926a.272.272 0 00.14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 01-.023-.156.49.49 0 01.201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.269-.03-.406-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.969-.982z"/></svg>
+            <span>微信</span>
+          </button>
+          <button class="social-btn qq">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.003 2c-2.265 0-6.29 1.364-6.29 7.325v1.195S3.55 14.96 3.55 17.474c0 .665.17 1.025.281 1.025.114 0 .902-.484 1.748-2.072 0 0-.18 2.197 1.904 3.967 0 0-1.77.495-1.77 1.182 0 .686 4.078.43 6.29.43 2.21 0 6.29.256 6.29-.43 0-.687-1.77-1.182-1.77-1.182 2.085-1.77 1.904-3.967 1.904-3.967.846 1.588 1.634 2.072 1.748 2.072.111 0 .281-.36.281-1.025 0-2.514-2.164-6.954-2.164-6.954V9.325C18.293 3.364 14.268 2 12.003 2z"/></svg>
+            <span>QQ</span>
+          </button>
+          <button class="social-btn weibo">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.739 5.443zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.194.573zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.579-.18-.405-.649.381-1.025.42-1.909.003-2.54-.781-1.188-2.924-1.123-5.383-.034 0 0-.768.334-.571-.271.381-1.206.324-2.215-.27-2.8-1.344-1.32-4.918.047-7.985 3.052C1.469 10.36 0 12.688 0 14.668c0 3.793 4.871 6.104 9.641 6.104 6.244 0 10.396-3.627 10.396-6.506 0-1.747-1.475-2.738-2.978-3.617zm1.67-7.251c-.733-.852-1.808-1.256-2.86-1.146-.459.048-.782.45-.734.902.048.452.455.772.91.724.548-.058 1.105.157 1.47.576.366.42.493.988.355 1.52-.114.439.15.889.59 1.003.44.114.892-.15 1.007-.588.248-.949.05-1.974-.738-2.991zm2.466 2.748c-1.326-1.542-3.274-2.272-5.176-2.074-.459.05-.782.45-.733.902.049.452.455.771.91.723.919-.097 1.86.27 2.49 1.002.63.731.845 1.715.608 2.64-.114.44.15.889.59 1.003.44.114.892-.15 1.007-.588.382-1.47.122-3.058-.696-4.608z"/></svg>
+            <span>微博</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 首页 ==================== -->
+    <div class="page home-page" id="homePage">
+      <!-- 顶部搜索栏 -->
+      <div class="home-header">
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" placeholder="搜索目的地、景点..." id="searchInput">
+          <button class="search-voice">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </button>
+        </div>
+        <button class="header-avatar" id="headerAvatar">
+          <img src="" alt="头像" id="headerAvatarImg" style="display:none">
+          <div class="avatar-placeholder" id="headerAvatarPlaceholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+        </button>
+      </div>
+
+      <!-- 快捷入口 -->
+      <div class="quick-actions">
+        <button class="quick-btn" data-action="create">
+          <div class="quick-icon" style="background:linear-gradient(135deg,#0d9488,#14b8a6)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <span>创建路线</span>
+        </button>
+        <button class="quick-btn" data-action="nearby">
+          <div class="quick-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <span>附近景点</span>
+        </button>
+        <button class="quick-btn" data-action="history">
+          <div class="quick-icon" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <span>历史足迹</span>
+        </button>
+        <button class="quick-btn" data-action="favorites">
+          <div class="quick-icon" style="background:linear-gradient(135deg,#ef4444,#f87171)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+          <span>收藏</span>
+        </button>
+      </div>
+
+      <!-- 地图容器 -->
+      <div class="home-map-section">
+        <div class="map-card">
+          <div class="map-header">
+            <h3>探索地图</h3>
+            <button class="map-expand" id="expandMap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            </button>
+          </div>
+          <div id="homeMap" class="home-map"></div>
+          <div class="map-overlay">
+            <button class="locate-btn" id="locateBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 推荐路线 -->
+      <div class="recommend-section">
+        <div class="section-title-row">
+          <h3>为你推荐</h3>
+          <button class="more-btn">更多 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="route-cards" id="recommendRoutes">
+          <!-- 动态生成 -->
+        </div>
+      </div>
+
+      <!-- 热门目的地 -->
+      <div class="hot-destinations">
+        <div class="section-title-row">
+          <h3>热门目的地</h3>
+          <button class="more-btn">更多 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="dest-scroll" id="destScroll">
+          <div class="dest-card" data-city="hangzhou">
+            <div class="dest-img" style="background:linear-gradient(135deg,#0d9488,#14b8a6)">
+              <span class="dest-name">杭州</span>
+              <span class="dest-tag">西湖</span>
+            </div>
+          </div>
+          <div class="dest-card" data-city="chengdu">
+            <div class="dest-img" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">
+              <span class="dest-name">成都</span>
+              <span class="dest-tag">熊猫</span>
+            </div>
+          </div>
+          <div class="dest-card" data-city="beijing">
+            <div class="dest-img" style="background:linear-gradient(135deg,#ef4444,#f87171)">
+              <span class="dest-name">北京</span>
+              <span class="dest-tag">故宫</span>
+            </div>
+          </div>
+          <div class="dest-card" data-city="shanghai">
+            <div class="dest-img" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">
+              <span class="dest-name">上海</span>
+              <span class="dest-tag">外滩</span>
+            </div>
+          </div>
+          <div class="dest-card" data-city="xian">
+            <div class="dest-img" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)">
+              <span class="dest-name">西安</span>
+              <span class="dest-tag">兵马俑</span>
+            </div>
+          </div>
+          <div class="dest-card" data-city="xiamen">
+            <div class="dest-img" style="background:linear-gradient(135deg,#ec4899,#f472b6)">
+              <span class="dest-name">厦门</span>
+              <span class="dest-tag">鼓浪屿</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 创建路线页 ==================== -->
+    <div class="page create-page" id="createPage">
+      <div class="page-header">
+        <button class="back-btn" id="createBack">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h2>创建路线</h2>
+        <div class="header-spacer"></div>
+      </div>
+
+      <div class="create-form">
+        <div class="form-step">
+          <div class="step-badge">1</div>
+          <div class="step-content">
+            <label>选择目的地</label>
+            <div class="dest-selector" id="createDestSelector">
+              <button class="dest-option active" data-city="hangzhou">
+                <span class="dest-option-icon">杭</span>
+                <span>杭州</span>
+              </button>
+              <button class="dest-option" data-city="chengdu">
+                <span class="dest-option-icon">成</span>
+                <span>成都</span>
+              </button>
+              <button class="dest-option" data-city="beijing">
+                <span class="dest-option-icon">京</span>
+                <span>北京</span>
+              </button>
+              <button class="dest-option" data-city="shanghai">
+                <span class="dest-option-icon">沪</span>
+                <span>上海</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-step">
+          <div class="step-badge">2</div>
+          <div class="step-content">
+            <label>旅行天数</label>
+            <div class="day-slider-wrapper">
+              <input type="range" id="daySlider" min="1" max="5" value="2" class="day-slider">
+              <div class="day-labels">
+                <span>1天</span><span>2天</span><span>3天</span><span>4天</span><span>5天</span>
+              </div>
+              <div class="day-value">已选 <strong id="dayValue">2</strong> 天</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-step">
+          <div class="step-badge">3</div>
+          <div class="step-content">
+            <label>偏好设置</label>
+            <div class="pref-tags" id="prefTags">
+              <button class="pref-tag active" data-tag="scenic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                景点
+              </button>
+              <button class="pref-tag active" data-tag="food">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                美食
+              </button>
+              <button class="pref-tag" data-tag="shopping">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                购物
+              </button>
+              <button class="pref-tag" data-tag="nature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                自然
+              </button>
+              <button class="pref-tag" data-tag="culture">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                文化
+              </button>
+              <button class="pref-tag" data-tag="night">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                夜景
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-step">
+          <div class="step-badge">4</div>
+          <div class="step-content">
+            <label>预算范围</label>
+            <div class="budget-options">
+              <button class="budget-btn" data-budget="low">
+                <span class="budget-price">&lt;500</span>
+                <span class="budget-label">经济型</span>
+              </button>
+              <button class="budget-btn active" data-budget="mid">
+                <span class="budget-price">500-1500</span>
+                <span class="budget-label">舒适型</span>
+              </button>
+              <button class="budget-btn" data-budget="high">
+                <span class="budget-price">1500+</span>
+                <span class="budget-label">豪华型</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="create-footer">
+        <button class="btn btn-primary btn-large" id="createRouteBtn">
+          <span class="btn-text">AI 生成路线</span>
+          <span class="btn-loading" style="display:none">
+            <span class="spinner"></span> 生成中...
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== 路线详情页 ==================== -->
+    <div class="page route-detail-page" id="routeDetailPage">
+      <div class="page-header transparent">
+        <button class="back-btn" id="detailBack">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h2 id="detailTitle">路线详情</h2>
+        <button class="header-action" id="detailMore">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+      </div>
+
+      <div class="detail-map-wrapper">
+        <div id="detailMap" class="detail-map"></div>
+        <div class="detail-map-overlay">
+          <button class="map-layer-toggle" id="detailLayerToggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </button>
+          <button class="map-playback-toggle" id="detailPlaybackToggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-content">
+        <div class="detail-info">
+          <h3 id="detailRouteName">杭州2日游</h3>
+          <div class="detail-meta">
+            <span class="meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span id="detailDuration">约6小时</span>
+            </span>
+            <span class="meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              <span id="detailDistance">约15公里</span>
+            </span>
+            <span class="meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              <span id="detailBudget">约800元</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- 天数切换 -->
+        <div class="day-tabs" id="dayTabs">
+          <!-- 动态生成 -->
+        </div>
+
+        <!-- 景点列表 -->
+        <div class="spot-list" id="spotList">
+          <!-- 动态生成 -->
+        </div>
+      </div>
+
+      <!-- 底部操作栏 -->
+      <div class="detail-footer">
+        <button class="footer-btn secondary" id="editRouteBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          编辑
+        </button>
+        <button class="footer-btn secondary" id="shareRouteBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          分享
+        </button>
+        <button class="footer-btn primary" id="navigateBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          开始导航
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== 个人中心页 ==================== -->
+    <div class="page profile-page" id="profilePage">
+      <!-- 用户信息卡片 -->
+      <div class="profile-header">
+        <div class="profile-bg"></div>
+        <div class="profile-user">
+          <div class="profile-avatar" id="profileAvatar">
+            <img src="" alt="头像" id="profileAvatarImg" style="display:none">
+            <div class="avatar-placeholder large" id="profileAvatarPlaceholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <button class="avatar-edit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </button>
+          </div>
+          <div class="profile-info">
+            <h3 id="profileName">游客用户</h3>
+            <p id="profilePhone">未登录</p>
+          </div>
+          <button class="profile-settings" id="profileSettings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.17 15 1.65 1.65 0 002.5 14V14a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V2a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9h.09a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 数据统计 -->
+      <div class="profile-stats">
+        <div class="stat-box">
+          <span class="stat-num" id="statRoutes">0</span>
+          <span class="stat-label">我的路线</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" id="statCities">0</span>
+          <span class="stat-label">去过城市</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" id="statSpots">0</span>
+          <span class="stat-label">打卡景点</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" id="statKm">0</span>
+          <span class="stat-label">总里程(km)</span>
+        </div>
+      </div>
+
+      <!-- 功能菜单 -->
+      <div class="profile-menu">
+        <div class="menu-group">
+          <button class="menu-item" id="menuMyRoutes">
+            <div class="menu-icon" style="background:#0d9488">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            </div>
+            <span>我的路线</span>
+            <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button class="menu-item" id="menuFavorites">
+            <div class="menu-icon" style="background:#ef4444">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            </div>
+            <span>我的收藏</span>
+            <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button class="menu-item" id="menuHistory">
+            <div class="menu-icon" style="background:#f59e0b">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <span>浏览历史</span>
+            <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <div class="menu-group">
+          <button class="menu-item" id="menuNotifications">
+            <div class="menu-icon" style="background:#8b5cf6">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            </div>
+            <span>消息通知</span>
+            <span class="menu-badge">3</span>
+            <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button class="menu-item" id="menuHelp">
+            <div class="menu-icon" style="background:#06b6d4">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <span>帮助与反馈</span>
+            <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button class="menu-item" id="menuAbout">
+            <div class="menu-icon" style="background:#78716c">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </div>
+            <span>关于我们</span>
+            <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <div class="menu-group" id="logoutGroup" style="display:none">
+          <button class="menu-item logout" id="logoutBtn">
+            <div class="menu-icon" style="background:#ef4444">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+            <span>退出登录</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 我的路线页 ==================== -->
+    <div class="page my-routes-page" id="myRoutesPage">
+      <div class="page-header">
+        <button class="back-btn" id="myRoutesBack">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h2>我的路线</h2>
+        <div class="header-spacer"></div>
+      </div>
+      <div class="my-routes-list" id="myRoutesList">
+        <!-- 动态生成 -->
+      </div>
+      <div class="empty-state" id="emptyRoutes" style="display:none">
+        <div class="empty-icon">
+          <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="28" stroke="#d6d3d1" stroke-width="2"/><path d="M20 44 L32 20 L44 44" stroke="#d6d3d1" stroke-width="2" fill="none"/></svg>
+        </div>
+        <p>还没有创建路线</p>
+        <button class="btn btn-primary" id="createFirstRoute">创建第一条路线</button>
+      </div>
+    </div>
+
+    <!-- ==================== 底部导航 ==================== -->
+    <nav class="tab-bar" id="tabBar">
+      <button class="tab-item active" data-page="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>首页</span>
+      </button>
+      <button class="tab-item" data-page="create">
+        <div class="tab-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+      </button>
+      <button class="tab-item" data-page="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>我的</span>
+      </button>
+    </nav>
+
+    <!-- 遮罩层 -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 分享弹窗 -->
+    <div class="modal" id="shareModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>分享路线</h3>
+          <button class="modal-close" id="closeShareModal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="share-options">
+          <button class="share-option wechat">
+            <div class="share-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z"/></svg>
+            </div>
+            <span>微信好友</span>
+          </button>
+          <button class="share-option moments">
+            <div class="share-icon" style="background:#07c160">
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+            </div>
+            <span>朋友圈</span>
+          </button>
+          <button class="share-option copy">
+            <div class="share-icon" style="background:#78716c">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </div>
+            <span>复制链接</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
